@@ -1,0 +1,18 @@
+﻿@page "/counter"
+
+<PageTitle>Contador</PageTitle>
+
+<h1>Contador</h1>
+
+<p role="status">Sumador: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Pulsar</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

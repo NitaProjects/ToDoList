@@ -1,0 +1,74 @@
+@page "/todo"
+@using global::ToDoList.App
+@using global::ToDoList.DTO
+@inject LocalStorageAccessor LocalStorageAccessor
+@inject HttpClient Http
+
+<PageTitle>Lista</PageTitle>
+
+<div class="tasks-container">
+    @foreach (TodoTask item in tasks)
+    {
+        <div class="task-item">
+            <input type="checkbox" @bind="item.IsComplete" @onclick="@(task => SaveAsync(item))" /> @item.Name
+            <button class="btn btn-secondary" @onclick="@(async () => await DeleteTaskAsync(item))">Eliminar</button>
+        </div>
+    }
+</div>
+
+<input type="text" value="@TaskText" @oninput="(e) => TaskText = e.Value.ToString()" @onkeydown="HandleKeyDown" />
+<button class="btn btn-primary" @onclick="AddTaskAsync">Añadir</button>
+<button class="btn btn-danger" @onclick="DeleteAllTasksAsync">Eliminar Todo</button>
+
+@code {
+    private List<TodoTask> tasks = new();
+    private string? TaskText { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            tasks = await Http.GetFromJsonAsync<List<TodoTask>>("http://localhost:5238/api/TodoItems");
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveAsync(TodoTask task)
+    {
+        await Http.PutAsJsonAsync($"http://localhost:5238/api/TodoItems/{task.Id}", task);
+    }
+
+    private async Task AddTaskAsync()
+    {
+        if (string.IsNullOrWhiteSpace(TaskText)) return;
+
+        var tasker = new TodoTask { Name = TaskText };
+        var response = await Http.PostAsJsonAsync("http://localhost:5238/api/TodoItems", tasker);
+        tasker = await response.Content.ReadFromJsonAsync<TodoTask>();
+        tasks.Add(tasker);
+        TaskText = "";
+    }
+
+    private async Task DeleteTaskAsync(TodoTask task)
+    {
+        tasks.Remove(task);
+        await Http.DeleteAsync($"http://localhost:5238/api/TodoItems/{task.Id}");
+    }
+
+    private async Task DeleteAllTasksAsync()
+    {
+        foreach (var task in tasks.ToList())
+        {
+            await DeleteTaskAsync(task);
+        }
+        tasks.Clear();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddTaskAsync();
+        }
+    }
+}

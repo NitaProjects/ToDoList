@@ -1,0 +1,20 @@
+﻿@inherits LayoutComponentBase
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <video autoplay muted loop class="video-background"><source src="videos/video3.mp4" type="video/mp4"></video>
+        
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">Documentación</a>
+            <a href="https://inetum.es" target="_blank">Sobre Nosotros</a>
+            <a href="https://auth.openai.com/authorize?client_id=TdJIcbe16WoTHtN95nyywh5E4yOo6ItG&scope=openid%20email%20profile%20offline_access%20model.request%20model.read%20organization.read%20organization.write&response_type=code&redirect_uri=https%3A%2F%2Fchatgpt.com%2Fapi%2Fauth%2Fcallback%2Flogin-web&audience=https%3A%2F%2Fapi.openai.com%2Fv1&device_id=74298245-7812-446a-9de0-1ff664b3a311&prompt=login&ext-statsig-tier=production&ext-oai-did=74298245-7812-446a-9de0-1ff664b3a311&state=rK0-0AcYycYIWVFqj-yXXyTvgXwmggHrIM_0C_2apXI&code_challenge=FQx7RgjdaGafY-CKE7s03fCUvR5EaI6UbGO1jnEB_CI&code_challenge_method=S256" target="_blank">Chat GiPiTi</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
