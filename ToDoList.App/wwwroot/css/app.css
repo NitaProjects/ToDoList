@@ -141,3 +141,46 @@ code {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.tasks-container {
+  margin-top: 20px;
+}
+
+/* Estilo para cada ítem de la lista */
+.list-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para las sublistas */
+.sub-list {
+  margin-left: 20px;
+}
+
+/* Estilo para los botones */
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.btn-secondary {
+  color: #fff;
+  background-color: #f91919;
+  border-color: #f91919;
+}
+
+/* Estilo para los elementos de las tareas */
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+/* Estilo para los checkboxes y botones de tareas */
+.task-item input[type="checkbox"] {
+  margin-right: 10px;
+}

@@ -2,11 +2,13 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 using ToDoList.DTO;
+using AutoMapper;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddCors(opt => opt.AddDefaultPolicy(policy => 
+builder.Services.AddCors(opt => opt.AddDefaultPolicy(policy =>
     policy.AllowAnyHeader()
     .AllowAnyMethod()
     .AllowAnyOrigin()));
@@ -15,10 +17,7 @@ builder.Services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoL
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAutoMapper(cfg => {
-
-    cfg.CreateMap<TodoTask, TodoItem>().ReverseMap();
-});
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
 
