@@ -19,19 +19,23 @@ namespace TodoApi.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Lists
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListDto>>> GetLists()
         {
-            var lists = await _context.Lists.Include(l => l.SubLists).Include(l => l.Tasks).ToListAsync();
+            var lists = await _context.Lists
+                .Include(l => l.SubLists)
+                .Include(l => l.Tasks)
+                .ToListAsync();
             return Ok(_mapper.Map<IEnumerable<ListDto>>(lists));
         }
 
-        // GET: api/Lists/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ListDto>> GetList(int id)
         {
-            var list = await _context.Lists.Include(l => l.SubLists).Include(l => l.Tasks).FirstOrDefaultAsync(l => l.ListId == id);
+            var list = await _context.Lists
+                .Include(l => l.SubLists)
+                .Include(l => l.Tasks)
+                .FirstOrDefaultAsync(l => l.ListId == id); 
 
             if (list == null)
             {
@@ -41,7 +45,6 @@ namespace TodoApi.Controllers
             return Ok(_mapper.Map<ListDto>(list));
         }
 
-        // PUT: api/Lists/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutList(int id, ListDto listDto)
         {
@@ -72,7 +75,6 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Lists
         [HttpPost]
         public async Task<ActionResult<ListDto>> PostList(ListDto listDto)
         {
@@ -83,7 +85,6 @@ namespace TodoApi.Controllers
             return CreatedAtAction(nameof(GetList), new { id = list.ListId }, _mapper.Map<ListDto>(list));
         }
 
-        // DELETE: api/Lists/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteList(int id)
         {

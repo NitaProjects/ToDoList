@@ -4,20 +4,13 @@ namespace TodoApi.Models
 {
     public class TodoContext : DbContext
     {
-        public TodoContext(DbContextOptions<TodoContext> options) : base(options)
-        {
-        }
+        public TodoContext(DbContextOptions<TodoContext> options) : base(options) { }
 
-        // DbSet existente para TodoItems
-        public DbSet<TodoItem> TodoItems { get; set; } = null!;
-
-        // Nuevos DbSet para Listas y Tareas
-        public DbSet<List> Lists { get; set; } = null!;
-        public DbSet<Task> Tasks { get; set; } = null!;
+        public DbSet<List> Lists { get; set; }
+        public DbSet<Task> Tasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configuración de la relación autorreferenciada para List
             modelBuilder.Entity<List>()
                 .HasMany(l => l.SubLists)
                 .WithOne(l => l.ParentList)

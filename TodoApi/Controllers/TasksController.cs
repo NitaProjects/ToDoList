@@ -19,7 +19,6 @@ namespace TodoApi.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Tasks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskDto>>> GetTasks()
         {
@@ -27,7 +26,6 @@ namespace TodoApi.Controllers
             return Ok(_mapper.Map<IEnumerable<TaskDto>>(tasks));
         }
 
-        // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskDto>> GetTask(int id)
         {
@@ -41,7 +39,6 @@ namespace TodoApi.Controllers
             return Ok(_mapper.Map<TaskDto>(task));
         }
 
-        // PUT: api/Tasks/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTask(int id, TaskDto taskDto)
         {
@@ -72,7 +69,6 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Tasks
         [HttpPost]
         public async Task<ActionResult<TaskDto>> PostTask(TaskDto taskDto)
         {
@@ -83,7 +79,6 @@ namespace TodoApi.Controllers
             return CreatedAtAction(nameof(GetTask), new { id = task.TaskId }, _mapper.Map<TaskDto>(task));
         }
 
-        // DELETE: api/Tasks/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {

@@ -8,7 +8,6 @@ body {
   src: url('/fonts/Nunito-Bold.ttf') format('truetype');  
 }
 
-
 h1:focus {
   outline: none;
 }
@@ -16,18 +15,6 @@ h1:focus {
 a,
 .btn-link {
   color: #0071c1;
-}
-
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.btn-secondary {
-  color: #fff;
-  background-color: #f91919;
-  border-color: #f91919;
 }
 
 .btn:focus,
@@ -130,36 +117,27 @@ code {
 }
 
 .tasks-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
   margin-top: 20px;
 }
 
-.task-item {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.tasks-container {
-  margin-top: 20px;
-}
-
-/* Estilo para cada ítem de la lista */
 .list-item {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  flex: 1 1 503px; 
+  max-width: 503px;
 }
 
-/* Estilo para las sublistas */
 .sub-list {
   margin-left: 20px;
 }
 
-/* Estilo para los botones */
+
 .btn-primary {
   color: #fff;
   background-color: #1b6ec2;
@@ -170,9 +148,21 @@ code {
   color: #fff;
   background-color: #f91919;
   border-color: #f91919;
+  margin-top: 10px;
 }
 
-/* Estilo para los elementos de las tareas */
+.btn-warning {
+  color: #fff;
+  background-color: #ffcc00;
+  border-color: #ffcc00;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
 .task-item {
   display: flex;
   align-items: center;
@@ -180,7 +170,6 @@ code {
   margin-bottom: 5px;
 }
 
-/* Estilo para los checkboxes y botones de tareas */
 .task-item input[type="checkbox"] {
   margin-right: 10px;
 }

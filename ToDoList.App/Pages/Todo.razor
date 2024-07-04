@@ -1,58 +1,61 @@
-@page "/todo"
-@using global::ToDoList.App
-@using global::ToDoList.DTO
-@inject LocalStorageAccessor LocalStorageAccessor
-@inject HttpClient Http
+@page "/todo" // Define la ruta de la página
+@using global::ToDoList.DTO 
+@using System.Net.Http.Json 
+@inject HttpClient Http // Inyecta HttpClient para realizar solicitudes HTTP
 
-<PageTitle>Lista</PageTitle>
+<PageTitle>Lista</PageTitle> <!-- Define el título de la página -->
 
-<!-- Contenedor principal para las tareas y listas -->
+<!-- Campo de texto y botón para añadir una nueva lista de tareas -->
+<div>
+    <input type="text" @bind="NewListName" placeholder="Nombre de la nueva lista" /> <!-- Campo de texto para el nombre de la nueva lista -->
+    <button class="btn btn-primary" @onclick="AddListAsync">Añadir Lista de Tareas</button> <!-- Botón para añadir una nueva lista -->
+</div>
+
 <div class="tasks-container">
-    <!-- Bucle para recorrer todas las listas -->
-    @foreach (var list in lists)
+    @foreach (var list in lists) // Recorre todas las listas
     {
         <div class="list-item">
-            <!-- Mostrar el nombre de la lista -->
-            <h3>@list.Name</h3>
+            <h3>@list.Name</h3> <!-- Muestra el nombre de la lista -->
 
-            <!-- Mostrar las tareas si existen -->
-            @if (list.Tasks != null && list.Tasks.Any())
+            <!-- Botones para gestionar la lista -->
+            <div>
+                <input type="text" @bind="NewTaskName" placeholder="Nombre de la nueva tarea" /> <!-- Campo de texto para el nombre de la nueva tarea -->
+                <button class="btn btn-primary" @onclick="@(async () => await AddTaskToListAsync(list))">Añadir</button> <!-- Botón para añadir una nueva tarea a la lista -->
+                <button class="btn btn-warning" @onclick="@(async () => await UpdateListAsync(list))">Actualizar</button> <!-- Botón para actualizar la lista -->
+                <button class="btn btn-danger" @onclick="@(async () => await DeleteListAsync(list.ListId))">Eliminar</button> <!-- Botón para eliminar la lista -->
+            </div>
+
+            <!-- Mostrar las tareas de la lista -->
+            @if (list.Tasks != null && list.Tasks.Any()) // Verifica si hay tareas en la lista
             {
                 <ul>
-                    <!-- Bucle para recorrer todas las tareas de la lista -->
-                    @foreach (var task in list.Tasks)
+                    @foreach (var task in list.Tasks) // Recorre todas las tareas de la lista
                     {
-                        <li>
-                            <!-- Checkbox para marcar la tarea como completada y botón para eliminar la tarea -->
-                            <input type="checkbox" @bind="task.IsComplete" @onclick="@(async () => await SaveTaskAsync(task))" /> @task.Title
-                            <button class="btn btn-secondary" @onclick="@(async () => await DeleteTaskAsync(task))">Eliminar</button>
+                        <li class="task-item">
+                            <input type="checkbox" @bind="task.IsComplete" @onclick="@(async () => await SaveTaskAsync(task))" /> @task.Title <!-- Checkbox para marcar la tarea como completada -->
+                            <button class="btn btn-secondary" @onclick="@(async () => await DeleteTaskAsync(task))">Eliminar</button> <!-- Botón para eliminar la tarea -->
                         </li>
                     }
                 </ul>
             }
 
             <!-- Mostrar sublistas si existen -->
-            @if (list.SubLists != null && list.SubLists.Any())
+            @if (list.SubLists != null && list.SubLists.Any()) // Verifica si hay sublistas en la lista
             {
                 <div class="sub-list">
-                    <!-- Bucle para recorrer todas las sublistas de la lista -->
-                    @foreach (var subList in list.SubLists)
+                    @foreach (var subList in list.SubLists) // Recorre todas las sublistas de la lista
                     {
                         <div class="list-item">
-                            <!-- Mostrar el nombre de la sublista -->
-                            <h4>@subList.Name</h4>
+                            <h4>@subList.Name</h4> <!-- Muestra el nombre de la sublista -->
 
-                            <!-- Mostrar las tareas de la sublista si existen -->
-                            @if (subList.Tasks != null && subList.Tasks.Any())
+                            @if (subList.Tasks != null && subList.Tasks.Any()) // Verifica si hay tareas en la sublista
                             {
                                 <ul>
-                                    <!-- Bucle para recorrer todas las tareas de la sublista -->
-                                    @foreach (var task in subList.Tasks)
+                                    @foreach (var task in subList.Tasks) // Recorre todas las tareas de la sublista
                                     {
-                                        <li>
-                                            <!-- Checkbox para marcar la tarea como completada y botón para eliminar la tarea -->
-                                            <input type="checkbox" @bind="task.IsComplete" @onclick="@(async () => await SaveTaskAsync(task))" /> @task.Title
-                                            <button class="btn btn-secondary" @onclick="@(async () => await DeleteTaskAsync(task))">Eliminar</button>
+                                        <li class="task-item">
+                                            <input type="checkbox" @bind="task.IsComplete" @onclick="@(async () => await SaveTaskAsync(task))" /> @task.Title <!-- Checkbox para marcar la tarea como completada -->
+                                            <button class="btn btn-secondary" @onclick="@(async () => await DeleteTaskAsync(task))">Eliminar</button> <!-- Botón para eliminar la tarea -->
                                         </li>
                                     }
                                 </ul>
@@ -65,82 +68,122 @@
     }
 </div>
 
-<!-- Campo de texto para agregar nuevas tareas -->
-<input type="text" value="@TaskText" @oninput="(e) => TaskText = e.Value.ToString()" @onkeydown="HandleKeyDown" />
-<button class="btn btn-primary" @onclick="AddTaskAsync">Añadir</button>
-<button class="btn btn-danger" @onclick="DeleteAllTasksAsync">Eliminar Todo</button>
-
 @code {
-    // Lista para almacenar las listas principales
+    // Lista de todas las listas de tareas
     private List<ListDto> lists = new();
-    // Texto de la tarea que se está añadiendo
-    private string? TaskText { get; set; }
+    // Nombre de la nueva lista a añadir
+    private string? NewListName { get; set; }
+    // Nombre de la nueva tarea a añadir
+    private string? NewTaskName { get; set; }
 
-    // Método que se ejecuta después de que el componente se renderiza por primera vez
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // Método que se ejecuta cuando la página se inicializa
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        lists = await Http.GetFromJsonAsync<List<ListDto>>("http://localhost:5238/api/Lists"); // Obtiene todas las listas desde la API
+    }
+
+    // Método para añadir una nueva lista
+    private async Task AddListAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewListName)) return; // Verifica si el nombre de la nueva lista está vacío
+
+        var newList = new ListDto { Name = NewListName }; // Crea un nuevo objeto ListDto con el nombre especificado
+        var response = await Http.PostAsJsonAsync("http://localhost:5238/api/Lists", newList); // Envía la nueva lista a la API
+        newList = await response.Content.ReadFromJsonAsync<ListDto>(); // Obtiene la lista añadida desde la API
+        lists.Add(newList); // Añade la nueva lista a la colección de listas
+        NewListName = ""; // Limpia el campo de texto para el nombre de la nueva lista
+        StateHasChanged(); // Actualiza la interfaz de usuario
+    }
+
+    // Método para actualizar una lista
+    private async Task UpdateListAsync(ListDto list)
+    {
+        var response = await Http.PutAsJsonAsync($"http://localhost:5238/api/Lists/{list.ListId}", list); // Envía la lista actualizada a la API
+        if (response.IsSuccessStatusCode) // Verifica si la solicitud fue exitosa
         {
-            // Obtener las listas desde la API
-            lists = await Http.GetFromJsonAsync<List<ListDto>>("http://localhost:5238/api/Lists");
-            StateHasChanged();
+            var updatedList = await response.Content.ReadFromJsonAsync<ListDto>(); // Obtiene la lista actualizada desde la API
+            var index = lists.FindIndex(l => l.ListId == list.ListId); // Encuentra el índice de la lista actualizada
+            if (index != -1) // Verifica si se encontró la lista
+            {
+                lists[index] = updatedList; // Actualiza la lista en la colección
+            }
+            StateHasChanged(); // Actualiza la interfaz de usuario
         }
     }
 
-    // Método para guardar cambios en una tarea
+    // Método para eliminar una lista
+    private async Task DeleteListAsync(int listId)
+    {
+        var response = await Http.DeleteAsync($"http://localhost:5238/api/Lists/{listId}"); // Envía la solicitud para eliminar la lista a la API
+        if (response.IsSuccessStatusCode) // Verifica si la solicitud fue exitosa
+        {
+            var list = lists.FirstOrDefault(l => l.ListId == listId); // Encuentra la lista a eliminar
+            if (list != null) // Verifica si se encontró la lista
+            {
+                lists.Remove(list); // Elimina la lista de la colección
+                StateHasChanged(); // Actualiza la interfaz de usuario
+            }
+        }
+    }
+
+    // Método para añadir una nueva tarea a una lista
+    private async Task AddTaskToListAsync(ListDto list)
+    {
+        if (string.IsNullOrWhiteSpace(NewTaskName)) return; // Verifica si el nombre de la nueva tarea está vacío
+
+        var newTask = new TaskDto { Title = NewTaskName, IsComplete = false, ListId = list.ListId }; // Crea un nuevo objeto TaskDto con el nombre especificado
+        var response = await Http.PostAsJsonAsync("http://localhost:5238/api/Tasks", newTask); // Envía la nueva tarea a la API
+        newTask = await response.Content.ReadFromJsonAsync<TaskDto>(); // Obtiene la tarea añadida desde la API
+        list.Tasks.Add(newTask); // Añade la nueva tarea a la lista
+        NewTaskName = ""; // Limpia el campo de texto para el nombre de la nueva tarea
+        StateHasChanged(); // Actualiza la interfaz de usuario
+    }
+
+    // Método para guardar una tarea
     private async Task SaveTaskAsync(TaskDto task)
     {
-        await Http.PutAsJsonAsync($"http://localhost:5238/api/Tasks/{task.TaskId}", task);
-    }
-
-    // Método para agregar una nueva tarea
-    private async Task AddTaskAsync()
-    {
-        if (string.IsNullOrWhiteSpace(TaskText)) return;
-
-        var tasker = new TaskDto { Title = TaskText };
-        var response = await Http.PostAsJsonAsync("http://localhost:5238/api/Tasks", tasker);
-        tasker = await response.Content.ReadFromJsonAsync<TaskDto>();
-        // Encuentra la primera lista para agregar la tarea
-        if (lists.Count > 0)
-        {
-            lists[0].Tasks.Add(tasker);
-        }
-        TaskText = "";
+        await Http.PutAsJsonAsync($"http://localhost:5238/api/Tasks/{task.TaskId}", task); // Envía la tarea actualizada a la API
     }
 
     // Método para eliminar una tarea
     private async Task DeleteTaskAsync(TaskDto task)
     {
-        foreach (var list in lists)
+        var response = await Http.DeleteAsync($"http://localhost:5238/api/Tasks/{task.TaskId}"); // Envía la solicitud para eliminar la tarea a la API
+        if (response.IsSuccessStatusCode) // Verifica si la solicitud fue exitosa
         {
-            if (list.Tasks.Remove(task))
+            foreach (var list in lists) // Recorre todas las listas
             {
-                await Http.DeleteAsync($"http://localhost:5238/api/Tasks/{task.TaskId}");
-                break;
+                if (list.Tasks.Remove(task)) // Elimina la tarea de la lista
+                {
+                    break; // Sale del bucle una vez que la tarea ha sido eliminada
+                }
             }
+            StateHasChanged(); // Actualiza la interfaz de usuario
         }
     }
 
-    // Método para eliminar todas las tareas
-    private async Task DeleteAllTasksAsync()
-    {
-        foreach (var list in lists)
-        {
-            foreach (var task in list.Tasks.ToList())
-            {
-                await DeleteTaskAsync(task);
-            }
-            list.Tasks.Clear();
-        }
-    }
-
-    // Método para manejar la pulsación de teclas en el campo de texto
+    // Método para manejar la pulsación de teclas
     private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter")
+        if (e.Key == "Enter") // Verifica si se presionó la tecla Enter
         {
-            await AddTaskAsync();
+            await AddTaskAsync(); // Añade una nueva tarea
         }
+    }
+
+    // Método para añadir una nueva tarea (no utilizado en este código, pero incluido para completar la lógica)
+    private async Task AddTaskAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewTaskName)) return; // Verifica si el nombre de la nueva tarea está vacío
+
+        var task = new TaskDto { Title = NewTaskName, IsComplete = false }; // Crea un nuevo objeto TaskDto con el nombre especificado
+        var response = await Http.PostAsJsonAsync("http://localhost:5238/api/Tasks", task); // Envía la nueva tarea a la API
+        task = await response.Content.ReadFromJsonAsync<TaskDto>(); // Obtiene la tarea añadida desde la API
+        if (lists.Count > 0) // Verifica si hay al menos una lista
+        {
+            lists[0].Tasks.Add(task); // Añade la nueva tarea a la primera lista
+        }
+        NewTaskName = ""; // Limpia el campo de texto para el nombre de la nueva tarea
+        StateHasChanged(); // Actualiza la interfaz de usuario
     }
 }
