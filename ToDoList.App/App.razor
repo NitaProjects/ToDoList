@@ -1,12 +1,20 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<!-- Este archivo define el componente raíz de la aplicación Blazor.
+     Configura el enrutamiento de la aplicación, especificando cómo se deben manejar las rutas encontradas y no encontradas.
+     Utiliza componentes de enrutamiento y disposición para gestionar la navegación y la presentación de páginas. -->
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
+        <!-- Cuando se encuentra una ruta, se renderiza el componente correspondiente utilizando el diseño predeterminado. -->
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <!-- Enfoca automáticamente el primer encabezado (h1) cuando se navega a una nueva ruta. -->
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
+        <!-- Página a mostrar cuando no se encuentra una ruta. -->
         <PageTitle>Not found</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <p role="alert">Lo sentimos, en esta dirección no hay nada.</p>
         </LayoutView>
     </NotFound>
 </Router>
+
